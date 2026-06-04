@@ -129,7 +129,8 @@ function gitPush(filename) {
  * 复制文本到剪贴板 (Windows PowerShell)
  */
 function copyToClipboard(text) {
-  runPowershell(`[System.Windows.Forms.Clipboard]::SetText('${text.replace(/'/g, "''")}')`);
+  const escaped = text.replace(/'/g, "''").replace(/`/g, '``');
+  runPowershell(`$env:CLIPTEXT='${escaped}'; Set-Clipboard -Value $env:CLIPTEXT`);
 }
 
 /**
