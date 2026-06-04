@@ -59,7 +59,7 @@ function getRepoDirs() {
 
   const items = fs.readdirSync(IMAGES_DIR, { withFileTypes: true });
   return items
-    .filter(item => item.isDirectory() && item.name !== '.git')
+    .filter(item => item.isDirectory() && !['.git', 'node_modules'].includes(item.name))
     .map(item => item.name);
 }
 
@@ -123,6 +123,13 @@ function gitPush(filename) {
       throw error;
     }
   }
+}
+
+/**
+ * 复制文本到剪贴板 (Windows PowerShell)
+ */
+function copyToClipboard(text) {
+  runPowershell(`[System.Windows.Forms.Clipboard]::SetText('${text.replace(/'/g, "''")}')`);
 }
 
 /**
@@ -205,7 +212,8 @@ async function handleClipboard(filename) {
 
     // 输出 CDN 链接
     const cdnUrl = generateCdnUrl(repoDir, filename);
-    console.log(`\n🔗 CDN 链接:\n${cdnUrl}`);
+    copyToClipboard(cdnUrl);
+    console.log(`\n🔗 CDN 链接:\n${cdnUrl}\n✅ 已自动复制到剪贴板`);
   } catch (error) {
     console.error(`\n❌ 错误: ${error.message}`);
     process.exit(1);
@@ -242,7 +250,8 @@ async function handleFile(filename) {
     if (repoDir === foundRepo) {
       console.log('⚠️  文件已在目标仓库中');
       const cdnUrl = generateCdnUrl(repoDir, filename);
-      console.log(`🔗 CDN 链接:\n${cdnUrl}`);
+      copyToClipboard(cdnUrl);
+      console.log(`🔗 CDN 链接:\n${cdnUrl}\n✅ 已自动复制到剪贴板`);
       return;
     }
 
@@ -254,7 +263,8 @@ async function handleFile(filename) {
     gitPush(filename);
 
     const cdnUrl = generateCdnUrl(repoDir, filename);
-    console.log(`\n🔗 CDN 链接:\n${cdnUrl}`);
+    copyToClipboard(cdnUrl);
+    console.log(`\n🔗 CDN 链接:\n${cdnUrl}\n✅ 已自动复制到剪贴板`);
   } catch (error) {
     console.error(`\n❌ 错误: ${error.message}`);
     process.exit(1);
