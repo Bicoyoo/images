@@ -111,15 +111,16 @@ function gitPush(filename) {
   console.log('\n📤 推送至 GitHub...');
 
   try {
-    execSync('git add .', { cwd: IMAGES_DIR, stdio: 'ignore' });
-    execSync(`git commit -m "chore: add image ${filename}"`, { cwd: IMAGES_DIR, stdio: 'ignore' });
-    execSync('git push', { cwd: IMAGES_DIR, stdio: 'ignore' });
+    execSync('git add .', { cwd: IMAGES_DIR, stdio: 'pipe' });
+    execSync(`git commit -m "chore: add image ${filename}"`, { cwd: IMAGES_DIR, stdio: 'pipe' });
+    execSync('git push', { cwd: IMAGES_DIR, stdio: 'pipe' });
     console.log('✅ 推送成功');
   } catch (error) {
     const output = (error.stdout?.toString() || '') + (error.stderr?.toString() || '');
     if (output.includes('nothing to commit')) {
       console.log('⚠️  无变更内容，跳过推送');
     } else {
+      console.error(`❌ Git 推送失败:\n${output}`);
       throw error;
     }
   }
