@@ -1,0 +1,12 @@
+{
+  "name": "imgpush",
+  "version": "1.0.0",
+  "description": "Push clipboard images to GitHub repository via jsDelivr CDN",
+  "main": "index.js",
+  "bin": {
+    "imgpush": "./index.js"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  }
+}
