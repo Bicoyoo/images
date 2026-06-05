@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>致特别的你</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  width: 100vw; height: 100vh; overflow: hidden;
+  background: linear-gradient(180deg, #0a0a2e 0%, #1a1a4e 40%, #2d1b69 70%, #4a2c8a 100%);
+  font-family: 'ZCOOL KuaiLe', sans-serif;
+}
+
+canvas { position: fixed; top: 0; left: 0; z-index: 1; }
+
+.stars {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 0;
+}
+.star {
+  position: absolute; width: 2px; height: 2px; background: #fff;
+  border-radius: 50%; animation: twinkle var(--duration) infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.content {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 10; pointer-events: none;
+}
+
+.name-tag {
+  margin-bottom: 1rem;
+  animation: fadeIn 2.5s ease-in;
+  position: relative;
+}
+.name-text {
+  font-size: 2.2rem; color: #e8d5ff;
+  letter-spacing: 0.5em;
+  padding: 0.4em 1.2em;
+  border: 1px solid rgba(232, 213, 255, 0.3);
+  border-radius: 2px;
+  background: rgba(232, 213, 255, 0.05);
+  text-shadow: 0 0 8px rgba(232, 213, 255, 0.4);
+  position: relative;
+}
+.name-text::before, .name-text::after {
+  content: ''; position: absolute;
+  width: 8px; height: 8px;
+  border: 1px solid rgba(232, 213, 255, 0.4);
+}
+.name-text::before { top: -4px; left: -4px; border-right: none; border-bottom: none; }
+.name-text::after { bottom: -4px; right: -4px; border-left: none; border-top: none; }
+
+.title {
+  font-size: 2.8rem; color: #fff;
+  text-shadow: 0 0 20px #ff69b4, 0 0 40px #ff69b4, 0 0 60px #ff69b4;
+  animation: float 3s ease-in-out infinite, fadeIn 2s ease-in;
+  margin-bottom: 1.5rem; letter-spacing: 0.15em;
+}
+
+.subtitle {
+  font-size: 1.5rem; color: #f0c0ff;
+  text-shadow: 0 0 10px #f0c0ff;
+  animation: fadeIn 3s ease-in;
+  margin-bottom: 3rem; letter-spacing: 0.1em;
+}
+
+.heart {
+  width: 120px; height: 120px; position: relative;
+  animation: beat 1.2s ease-in-out infinite, fadeIn 4s ease-in;
+  filter: drop-shadow(0 0 20px #ff69b4) drop-shadow(0 0 40px #ff1493);
+}
+.heart::before, .heart::after {
+  content: ''; position: absolute; width: 60px; height: 96px;
+  background: linear-gradient(180deg, #ff69b4, #ff1493);
+  border-radius: 60px 60px 0 0;
+}
+.heart::before { left: 60px; transform: rotate(-45deg); transform-origin: 0 100%; }
+.heart::after { left: 0; transform: rotate(45deg); transform-origin: 100% 100%; }
+
+@keyframes beat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sparkles {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 5; pointer-events: none;
+}
+.sparkle {
+  position: absolute; width: var(--size); height: var(--size);
+  background: radial-gradient(circle, #fff, transparent);
+  border-radius: 50%; animation: sparkle var(--duration) infinite;
+  opacity: 0;
+}
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1); }
+}
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<canvas id="meteors"></canvas>
+<div class="sparkles" id="sparkles"></div>
+
+<div class="content">
+  <div class="name-tag"><span class="name-text">刘 灿</span></div>
+  <div class="title">遇见你，是最美丽的意外</div>
+  <div class="subtitle">每一颗流星，都是我想你的瞬间</div>
+  <div class="heart"></div>
+</div>
+
+<script>
+// 生成背景星星
+const starsContainer = document.getElementById('stars');
+for (let i = 0; i < 100; i++) {
+  const star = document.createElement('div');
+  star.className = 'star';
+  star.style.left = `${Math.random() * 100}%`;
+  star.style.top = `${Math.random() * 100}%`;
+  star.style.setProperty('--duration', `${Math.random() * 3 + 1}s`);
+  star.style.animationDelay = `${Math.random() * 3}s`;
+  star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
+  starsContainer.appendChild(star);
+}
+
+// 生成闪光效果
+const sparklesContainer = document.getElementById('sparkles');
+for (let i = 0; i < 20; i++) {
+  const sparkle = document.createElement('div');
+  sparkle.className = 'sparkle';
+  sparkle.style.left = `${Math.random() * 100}%`;
+  sparkle.style.top = `${Math.random() * 100}%`;
+  sparkle.style.setProperty('--size', `${Math.random() * 4 + 2}px`);
+  sparkle.style.setProperty('--duration', `${Math.random() * 4 + 2}s`);
+  sparkle.style.animationDelay = `${Math.random() * 4}s`;
+  sparklesContainer.appendChild(sparkle);
+}
+
+// 流星雨 Canvas
+const canvas = document.getElementById('meteors');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+class Meteor {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * canvas.width * 1.5;
+    this.y = Math.random() * -canvas.height;
+    this.len = Math.random() * 80 + 40;
+    this.speed = Math.random() * 8 + 4;
+    this.angle = Math.PI / 4 + (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.7 + 0.3;
+    this.width = Math.random() * 2 + 1;
+    this.color = `hsla(${Math.random() * 60 + 300}, 80%, 80%, ${this.opacity})`;
+  }
+  update() {
+    this.x += Math.cos(this.angle) * this.speed;
+    this.y += Math.sin(this.angle) * this.speed;
+    if (this.x > canvas.width + this.len || this.y > canvas.height + this.len) {
+      this.reset();
+    }
+  }
+  draw() {
+    const tailX = this.x - Math.cos(this.angle) * this.len;
+    const tailY = this.y - Math.sin(this.angle) * this.len;
+    const gradient = ctx.createLinearGradient(tailX, tailY, this.x, this.y);
+    gradient.addColorStop(0, `rgba(255,255,255,0)`);
+    gradient.addColorStop(1, this.color);
+    ctx.beginPath();
+    ctx.moveTo(tailX, tailY);
+    ctx.lineTo(this.x, this.y);
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = this.width;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+}
+
+const meteors = Array.from({ length: 30 }, () => new Meteor());
+
+function animate() {
+  ctx.fillStyle = 'rgba(10, 10, 46, 0.15)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  meteors.forEach(m => { m.update(); m.draw(); });
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+
+</body>
+</html>
