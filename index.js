@@ -25,6 +25,8 @@ function runPowershell(script) {
   return result.stdout.trim();
 }
 
+const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.bmp', '.ico'];
+
 /**
  * 从剪贴板读取图片（Base64 PNG 格式）
  */
@@ -230,19 +232,36 @@ async function handleFile(filename) {
     const dirs = getRepoDirs();
     let foundPath = null;
     let foundRepo = null;
+    let foundFilename = filename;
 
-    // 检索文件
-    for (const dir of dirs) {
-      const filePath = path.join(IMAGES_DIR, dir, filename);
-      if (fs.existsSync(filePath)) {
-        foundPath = filePath;
-        foundRepo = dir;
-        break;
+    // 如果用户输入包含后缀，直接精确查找
+    if (filename.includes('.')) {
+      for (const dir of dirs) {
+        const filePath = path.join(IMAGES_DIR, dir, filename);
+        if (fs.existsSync(filePath)) {
+          foundPath = filePath;
+          foundRepo = dir;
+          break;
+        }
+      }
+    } else {
+      // 不含后缀，自动匹配图片格式
+      for (const dir of dirs) {
+        for (const ext of IMAGE_EXTS) {
+          const filePath = path.join(IMAGES_DIR, dir, filename + ext);
+          if (fs.existsSync(filePath)) {
+            foundPath = filePath;
+            foundRepo = dir;
+            foundFilename = filename + ext;
+            break;
+          }
+        }
+        if (foundPath) break;
       }
     }
 
     if (!foundPath) {
-      throw new Error(`未找到文件: ${filename}\n请在以下目录中查找: ${dirs.join(', ')}`);
+      throw new Error(`未找到文件: ${filename}\n支持的图片格式: ${IMAGE_EXTS.join(', ')}\n仓库目录: ${dirs.join(', ')}`);
     }
 
     // 选择目标仓库
@@ -251,20 +270,20 @@ async function handleFile(filename) {
     // 同一目录直接返回链接
     if (repoDir === foundRepo) {
       console.log('⚠️  文件已在目标仓库中');
-      const cdnUrl = generateCdnUrl(repoDir, filename);
+      const cdnUrl = generateCdnUrl(repoDir, foundFilename);
       copyToClipboard(cdnUrl);
       console.log(`🔗 CDN 链接:\n${cdnUrl}\n✅ 已自动复制到剪贴板`);
       return;
     }
 
     // 复制到目标仓库
-    const destPath = path.join(IMAGES_DIR, repoDir, filename);
+    const destPath = path.join(IMAGES_DIR, repoDir, foundFilename);
     fs.copyFileSync(foundPath, destPath);
     console.log(`✅ 已复制到: ${destPath}`);
 
-    gitPush(filename);
+    gitPush(foundFilename);
 
-    const cdnUrl = generateCdnUrl(repoDir, filename);
+    const cdnUrl = generateCdnUrl(repoDir, foundFilename);
     copyToClipboard(cdnUrl);
     console.log(`\n🔗 CDN 链接:\n${cdnUrl}\n✅ 已自动复制到剪贴板`);
   } catch (error) {
