@@ -14,6 +14,17 @@ npm link
 
 ## 用法
 
+### 0. 快捷模式 — `imgpush`
+
+直接执行，无需任何参数：
+
+```bash
+imgpush                      # 快捷模式，保存为 imgpush.png
+```
+
+- 等效于 `imgpush -C imgpush`
+- 若 `imgpush.png` 已存在于仓库中，自动生成 12 位 hash 文件名避免冲突
+
 ### 1. 剪贴板模式 — `imgpush -C [文件名]`
 
 截图后执行，从剪贴板读取图片上传：

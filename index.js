@@ -4,6 +4,7 @@ const { execSync, spawnSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const readline = require('readline');
+const crypto = require('crypto');
 
 const IMAGES_DIR = 'D:\\workspace\\images';
 const CDN_BASE = 'https://cdn.jsdelivr.net/gh/Bicoyoo/images@main';
@@ -151,31 +152,39 @@ function showHelp() {
 📦 imgpush - 剪贴板图片上传至 GitHub 图床
 
 用法:
-  imgpush --clipboard [文件名]    从剪贴板读取图片并上传
-  imgpush -C [文件名]            同上（简写模式）
-  imgpush <文件名>               通过文件名检索已有图片并上传
-  imgpush --help                 显示此帮助信息
+  imgpush                      快捷模式：使用 "imgpush" 为文件名，已存在则用 hash
+  imgpush --clipboard [文件名]  从剪贴板读取图片并上传
+  imgpush -C [文件名]          同上（简写模式）
+  imgpush <文件名>              通过文件名检索已有图片并上传
+  imgpush --help               显示此帮助信息
 
-三个指令说明:
-  1. imgpush --clipboard [文件名]
+四个指令说明:
+  1. imgpush
+     - 快捷模式，等效于 imgpush -C imgpush
+     - 若 "imgpush" 已存在于仓库中，自动生成 hash 文件名避免冲突
+
+  2. imgpush --clipboard [文件名]
      - 从系统剪贴板读取图片（需提前截图）
      - 保存到指定仓库目录，文件名默认为 "image"
      - 自动执行 git add / commit / push
      - 返回 jsDelivr CDN 访问链接
 
-  2. imgpush -C [文件名]
+  3. imgpush -C [文件名]
      - --clipboard 的简写形式，功能完全一致
      - 例如: imgpush -C my-screenshot
 
-  3. imgpush <文件名>
+  4. imgpush <文件名>
      - 通过文件名在所有仓库目录中检索已有图片
      - 找到后重新推送至 GitHub（可切换仓库目录）
+     - 不含后缀时自动匹配常见图片格式
      - 适用于已存在但需重新发布的图片
 
 示例:
-  imgpush -C label-management      # 剪贴板图片，保存为 label-management.png
-  imgpush --clipboard demo         # 剪贴板图片，保存为 demo.png
-  imgpush old-image.png            # 检索 old-image.png 并重新推送
+  imgpush                        # 快捷模式，保存为 imgpush.png（冲突时用 hash）
+  imgpush -C label-management    # 剪贴板图片，保存为 label-management.png
+  imgpush --clipboard demo       # 剪贴板图片，保存为 demo.png
+  imgpush old-image              # 检索 old-image.png/jpg 等并重新推送
+  imgpush old-image.png          # 精确检索 old-image.png 并重新推送
 
 配置:
   图片仓库目录: ${IMAGES_DIR}
@@ -301,6 +310,25 @@ async function main() {
   // 帮助
   if (args.includes('--help') || args.includes('-h')) {
     showHelp();
+    return;
+  }
+
+  // 无参数模式：默认文件名 "imgpush"，已存在则用 hash
+  if (args.length === 0) {
+    const defaultName = 'imgpush';
+    const dirs = getRepoDirs();
+    let exists = false;
+    for (const dir of dirs) {
+      for (const ext of IMAGE_EXTS) {
+        if (fs.existsSync(path.join(IMAGES_DIR, dir, defaultName + ext))) {
+          exists = true;
+          break;
+        }
+      }
+      if (exists) break;
+    }
+    const filename = exists ? crypto.randomBytes(6).toString('hex') : defaultName;
+    await handleClipboard(filename);
     return;
   }
 
